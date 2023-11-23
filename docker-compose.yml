@@ -19,6 +19,6 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - ./myproject:/code/myproject
+      - ./evidence:/code/evidence
     command: python ./manage.py runserver 0:8005
     restart: unless-stopped
