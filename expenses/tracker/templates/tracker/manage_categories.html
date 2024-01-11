@@ -1,0 +1,39 @@
+{% extends 'tracker/base.html' %}
+
+{% block title %}Manage Categories - Expense Tracker{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <h2>Manage Categories</h2>
+
+    <!-- Form to Add New Category -->
+    <form method="post" action="{% url 'manage_categories' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Add Category</button>
+    </form>
+
+    <hr>
+
+    <!-- Table to Display Existing Categories -->
+    <h3>Existing Categories</h3>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category in categories %}
+                <tr>
+                    <td>{{ category.id }}</td>
+                    <td>{{ category.name }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

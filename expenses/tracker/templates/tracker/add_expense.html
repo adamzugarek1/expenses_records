@@ -1,0 +1,82 @@
+{% extends 'tracker/base.html' %}
+
+{% block title %}Add Expense - Expense Tracker{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <h2>Add Expense</h2>
+
+    {% if form.errors %}
+        <div class="errors">
+            {% for field, error_list in form.errors.items %}
+                {% for error in error_list %}
+                    <p>{{ field }}: {{ error }}</p>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'add_expense' %}">
+        {% csrf_token %}
+
+        <div>
+            <label for="id_category">Category:</label>
+<select name="category" id="id_category" required>
+    <option value="" disabled selected>Select a category</option>
+    {% for category in categories %}
+        <option value="{{ category.id }}">{{ category.name }}</option>
+    {% endfor %}
+</select>
+
+            <label for="id_amount">Amount:</label>
+            <input type="number" name="amount" id="id_amount" required>
+
+            <!-- Currency Dropdown -->
+            <select id="id_currency" name="currency">
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="CZK">CZK</option>
+                <option value="GBP">GBP</option>
+            </select>
+        </div>
+
+        <!-- Date Field -->
+        <div>
+            <label for="id_date">Date:</label>
+            <input type="date" name="date" id="id_date" required>
+        </div>
+
+        <!-- Name Field -->
+        <div>
+            <label for="id_name">Name:</label>
+            <input type="text" name="name" id="id_name" required>
+        </div>
+
+        <button type="submit">Add Expense</button>
+    </form>
+
+    <!-- Display Selected Currency -->
+    <div id="selected-currency">Selected Currency: USD</div>
+</div>
+
+<!-- JavaScript to enable/disable category dropdown based on custom category input -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var categoryDropdown = document.getElementById('id_category');
+
+        customCategoryInput.addEventListener('input', function() {
+            // Disable category dropdown if custom category is entered
+            categoryDropdown.disabled = customCategoryInput.value.trim() !== '';
+        });
+
+        var currencyDropdown = document.getElementById('id_currency');
+        var selectedCurrencyDisplay = document.getElementById('selected-currency');
+
+        currencyDropdown.addEventListener('change', function() {
+            selectedCurrencyDisplay.textContent = 'Selected Currency: ' + currencyDropdown.value;
+        });
+    });
+</script>
+
+{% endblock %}

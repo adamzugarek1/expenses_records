@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense List</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'tracker/styles.css' %}">
+</head>
+<body>
+
+    <div class="container">
+
+        <div class="sidebar">
+            <h3>Categories</h3>
+            <ul>
+                {% for category in categories %}
+                    <li>{{ category.name }}</li>
+                {% endfor %}
+            </ul>
+
+            <h3>Navigation</h3>
+            <a href="{% url 'add_expense' %}">Add Expense</a>
+            <a href="{% url 'register' %}">Login</a>
+        </div>
+
+<div class="content">
+
+    <h1>Expense List</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Amount</th>
+                <th>Date</th>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for expense in expenses %}
+                <tr>
+                    <td>{{ expense.category.name }}</td>
+                    <td>{{ expense.amount }} {{ expense.currency }}</td>
+                    <td>{{ expense.date }}</td>
+                    <td>{{ expense.name }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+
+    </div>
+
+</body>
+</html>
