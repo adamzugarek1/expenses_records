@@ -2,10 +2,12 @@
 from django.contrib.auth import login, authenticate, update_session_auth_hash
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 from django.contrib import messages
+from django.contrib.sites import requests
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView
+from bs4 import BeautifulSoup
 
 from .models import Category, Expense
 from .forms import *
@@ -114,3 +116,26 @@ class PasswordChangeView(View):
             return redirect('expense_list')
 
         return render(request, self.template_name, {'form': form})
+
+
+def expense_list(request):
+    url = 'https://www.cnb.cz/cs/financni_trhy/devizovy_trh/kurzy_devizoveho_trhu/denni_kurz.txt?date=dd.mm.yyyy'
+
+    page = requests.get(url)
+
+    soup = BeautifulSoup(page.text, 'html')
+    soup = str(soup)
+
+    b = soup.split('\n')
+
+    libra = (b[-2][-6:-1].replace(',', '.'))
+    dollar = (b[-3][-6:-1].replace(',', '.'))
+    euro = (b[7][-6:-1].replace(',', '.'))
+
+    libra = float(libra)
+    dollar = float(dollar)
+    euro = float(euro)
+
+    rates = {'GBP': libra, 'USD': dollar, 'EUR': euro}
+    context = {'rates': rates}
+    return render(request, 'tracker/expense_list.html', context)
