@@ -1,30 +1,8 @@
-<!DOCTYPE html>
-{% load static %}
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expense List</title>
-    <link rel="stylesheet" type="text/css" href="{% static 'tracker/styles.css' %}">
-</head>
-<body>
+{% extends 'tracker/base.html' %}
 
-    <div class="container">
-
-        <div class="sidebar">
-            <h3>Categories</h3>
-            <ul>
-                {% for category in categories %}
-                    <li>{{ category.name }}</li>
-                {% endfor %}
-            </ul>
-
-            <h3>Navigation</h3>
-            <a href="{% url 'add_expense' %}">Add Expense</a>
-            <a href="{% url 'register' %}">Login</a>
-        </div>
-
-<div class="content">
+{% block title %}Expense list{% endblock %}
+{% block content %}
+{% if user.is_authenticated %}
 
     <h1>Expense List</h1>
 
@@ -33,6 +11,7 @@
             <tr>
                 <th>Category</th>
                 <th>Amount</th>
+                <th>CZK</th>
                 <th>Date</th>
                 <th>Name</th>
             </tr>
@@ -42,6 +21,7 @@
                 <tr>
                     <td>{{ expense.category.name }}</td>
                     <td>{{ expense.amount }} {{ expense.currency }}</td>
+                    <td>{{ expense.to_czk }}</td>
                     <td>{{ expense.date }}</td>
                     <td>{{ expense.name }}</td>
                 </tr>
@@ -49,10 +29,11 @@
         </tbody>
     </table>
 
-</div>
+<h2> Total amount </h2> - {{sum_amount|floatformat:2}} CZK
 
+{% else %}
+<h1>Register to See a list</h1>
 
-    </div>
+{% endif %}
+{% endblock %}
 
-</body>
-</html>

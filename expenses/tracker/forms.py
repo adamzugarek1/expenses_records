@@ -24,7 +24,7 @@ class CategoryForm(forms.ModelForm):
 class ExpenseForm(forms.ModelForm):
     class Meta:
         model = Expense
-        fields = ['category',  'amount', 'currency', 'date', 'name']
+        fields = ['category', 'amount', 'currency', 'date', 'name']
 
     def __init__(self, *args, categories=None, **kwargs):
         super(ExpenseForm, self).__init__(*args, **kwargs)

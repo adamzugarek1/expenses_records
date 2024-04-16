@@ -1,16 +1,21 @@
 # views.py
+import csv
+from datetime import date
+
+import requests
 from django.contrib.auth import login, authenticate, update_session_auth_hash
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 from django.contrib import messages
-from django.contrib.sites import requests
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView
-from bs4 import BeautifulSoup
 
-from .models import Category, Expense
+from .models import Category, Expense, ExchangeRate
 from .forms import *
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from django.db.models import Sum
 
 
 class ExpenseListView(View):
@@ -41,10 +46,8 @@ class AddExpenseView(View):
 
             expense = form.save(commit=False)
             expense.category = category
-            expense.user = request.user
+            expense.user_id = request.user
             expense.save()
-
-            form.save()
 
             return redirect('expense_list')
 
@@ -119,23 +122,35 @@ class PasswordChangeView(View):
 
 
 def expense_list(request):
-    url = 'https://www.cnb.cz/cs/financni_trhy/devizovy_trh/kurzy_devizoveho_trhu/denni_kurz.txt?date=dd.mm.yyyy'
+    rates = ExchangeRate.objects.filter(date=date.today())
 
-    page = requests.get(url)
+    if not rates:
+        url = 'https://www.cnb.cz/cs/financni_trhy/devizovy_trh/kurzy_devizoveho_trhu/denni_kurz.txt'
 
-    soup = BeautifulSoup(page.text, 'html')
-    soup = str(soup)
+        page = requests.get(url)
+        reader = csv.reader(page.text.split("\n"), delimiter="|")
 
-    b = soup.split('\n')
+        for row in reader:
+            if len(row) == 5 and row[3] in ("GBP", "USD", "EUR"):
+                ExchangeRate.objects.get_or_create(
+                    currency=row[3],
+                    date=date.today(),
+                    rate=float(row[4].replace(",", ".")),
+                )
+        rates = ExchangeRate.objects.filter(date=date.today())
 
-    libra = (b[-2][-6:-1].replace(',', '.'))
-    dollar = (b[-3][-6:-1].replace(',', '.'))
-    euro = (b[7][-6:-1].replace(',', '.'))
+    exchange_rates = {"CZK": 1}
 
-    libra = float(libra)
-    dollar = float(dollar)
-    euro = float(euro)
+    for rate in rates:
+       exchange_rates[rate.currency] = rate.rate
 
-    rates = {'GBP': libra, 'USD': dollar, 'EUR': euro}
-    context = {'rates': rates}
+    expenses = Expense.objects.filter(user_id=request.user.id)
+    sum_amount = 0
+
+    for expense in expenses:
+        expense.to_czk = expense.amount * exchange_rates[expense.currency]
+        sum_amount += expense.to_czk
+
+    context = {'rates': rates, "expenses": expenses, 'sum_amount': sum_amount}
     return render(request, 'tracker/expense_list.html', context)
+

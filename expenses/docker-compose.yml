@@ -8,6 +8,7 @@ services:
     volumes:
       - ./expenses:/code/expenses
       - ./tracker:/code/tracker
+      - ./db.sqlite3:/code/db.sqlite3
     command: python ./manage.py runserver 0:8005
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8005/"]
